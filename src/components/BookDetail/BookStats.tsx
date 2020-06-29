@@ -2,6 +2,7 @@ import React from "react";
 import useAxios from "@use-hooks/axios";
 
 import { Book } from "../../model/Book";
+import { getBloomApiUrl } from "../../connection/ApiConnection";
 
 // The casing here is unfortunate, but that's what the database gives us no matter what we do there.
 // Could be enhanced by remapping all the fields in the Azure function or here, but those
@@ -37,9 +38,9 @@ export const BookStats: React.FunctionComponent<{
 }> = (props) => {
     function useGetBookStats(book: Book): IBookStats {
         const { response } = useAxios({
-            url: `https://api.bloomlibrary.org/v1/stats?book=${book.id}&book-instance-id=${book.bookInstanceId}`,
-            // Use this when debugging changes to the Azure function
-            // url: `http://localhost:7071/v1/stats?book=${book.id}&book-instance-id=${book.bookInstanceId}`,
+            url: `${getBloomApiUrl()}/v1/stats?book=${
+                book.id
+            }&book-instance-id=${book.bookInstanceId}`,
             method: "GET",
             trigger: book.id,
         });

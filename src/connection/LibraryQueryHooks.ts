@@ -1,6 +1,7 @@
-import useAxios, { IReturns, axios } from "@use-hooks/axios";
+import useAxios, { IReturns, axios, IParams } from "@use-hooks/axios";
 import { IFilter, InCirculationOptions } from "../IFilter";
 import { getConnection } from "./ParseServerConnection";
+import { getBloomApiUrl } from "./ApiConnection";
 import { Book, createBookFromParseServerData } from "../model/Book";
 import { useContext, useMemo, useEffect, useState } from "react";
 import { CachedTablesContext } from "../App";
@@ -336,16 +337,37 @@ function useBookQueryInternal(
     doNotRunActuallyQuery?: boolean
 ): IAxiosAnswer {
     const { tags } = useContext(CachedTablesContext);
+    const axiosParams = makeBookQueryAxiosParams(
+        params,
+        filter,
+        limit,
+        skip,
+        doNotRunActuallyQuery,
+        tags
+    );
+    return useAxios(axiosParams);
+}
 
+// Creates a partial Axios params object with the url and connection headers filled in.
+// The caller is responsible for filling out the rest of the object.
+function makeBookQueryAxiosParams(
+    params: {}, // this is the order, which fields, limits, etc.
+    filter: IFilter, // this is *which* records to return
+    limit?: number, //pagination
+    skip?: number, //pagination
+    doNotRunActuallyQuery?: boolean,
+    tags?: string[]
+): IParams<any> {
     const finalParams = constructParseBookQuery(
         params,
         filter,
-        tags,
+        tags || [],
         limit,
         skip
     );
     //console.log("finalParams: " + JSON.stringify(finalParams));
-    return useAxios({
+
+    return {
         url: `${getConnection().url}classes/books`,
         // The "rules of hooks" require that if we're ever going to run a useEffect, we have to *always* run it
         // So we can't conditionally run this useBookQueryInternal(). But useAxios does give this way to run its
@@ -365,7 +387,7 @@ function useBookQueryInternal(
             headers: getConnection().headers,
             params: finalParams,
         },
-    });
+    };
 }
 
 // export function useBookQuery(
@@ -520,6 +542,26 @@ export function useSearchBooks(
         books: typeSafeBookRecords,
         waiting: simplifiedResultStatus.waiting,
     };
+}
+
+// Sends a request to get the stats for all books matching the filters
+export function useCollectionStats(filter: IFilter): IAxiosAnswer {
+    const params = {
+        // It seems at least 1 key needs to be requested for it to return any results
+        keys: "objectId",
+    };
+    const bookQueryParams = makeBookQueryAxiosParams(params, filter);
+
+    return useAxios({
+        url: `${getBloomApiUrl()}/v1/stats`,
+        method: "POST",
+        options: {
+            data: {
+                "book-query": bookQueryParams,
+            },
+        },
+        trigger: bookQueryParams.trigger,
+    });
 }
 
 function processAxiosStatus(answer: IAxiosAnswer): ISimplifiedAxiosResult {

@@ -14,6 +14,7 @@ import { useTrack } from "../analytics/Analytics";
 import { IEmbedSettings } from "../model/ContentInterfaces";
 import { useDocumentTitle } from "./Routes";
 import { getCollectionAnalyticsInfo } from "../analytics/CollectionAnalyticsInfo";
+import { CollectionStats } from "./CollectionStats";
 
 export const CollectionPage: React.FunctionComponent<{
     collectionName: string;
@@ -106,6 +107,7 @@ export const CollectionPage: React.FunctionComponent<{
     return (
         <div>
             {!!props.embeddedSettings || banner}
+            <CollectionStats collection={collection}></CollectionStats>
             <ListOfBookGroups>
                 {collectionRows}
                 {booksComponent}

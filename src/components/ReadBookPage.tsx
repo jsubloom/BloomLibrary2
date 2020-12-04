@@ -203,12 +203,24 @@ export const ReadBookPage: React.FunctionComponent<{
         console.log("History length: " + history.length);
         console.log("window.history length: " + window.history.length);
         console.error("Off by " + historyDifference);
-        //window.history.go(-historyDifference);
-        //window.history.go(-1);
-        history.replace(history.location);
-        //console.log("new window.history length: " + window.history.length);
-        return null;
     }
+
+    useEffect(() => {
+        const historyDifference2 = window.history.length - history.length;
+        if (historyDifference2 > 0) {
+            console.log("History length: " + history.length);
+            console.log("window.history length: " + window.history.length);
+            console.error("Setting custom onpopostate.");
+
+            window.onpopstate = () => {
+                console.log("Custom onPopstate fired.");
+            };
+            //history.replace(history.location);
+            //history.goBack();
+            //window.history.go(-historyDifference);
+            //window.history.go(-1);
+        }
+    });
 
     // This theme matches Bloom-player. It is supposed to help the full-screen button
     // better match the Bloom-player icons, whose toolbar it overlays. Not successful

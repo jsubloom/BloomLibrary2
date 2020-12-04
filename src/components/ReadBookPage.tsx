@@ -24,6 +24,8 @@ export const ReadBookPage: React.FunctionComponent<{
     const id = props.id;
     const history = useHistory();
     const location = useLocation();
+
+    console.log("In ReadBookPage.");
     const widerThanPhone = useMediaQuery("(min-width:450px)"); // a bit more than the largest phone width in the chrome debugger (411px)
     const higherThanPhone = useMediaQuery("(min-height:450px)");
     // If either dimension is smaller than a phone, we'll guess we are on one
@@ -195,6 +197,18 @@ export const ReadBookPage: React.FunctionComponent<{
             url
         )}&showBackButton=${showBackButton}&centerVertically=false&useOriginalPageSize=true` +
         `${langParam}&hideFullScreenButton=${autoFullScreen}&independent=false&host=bloomlibrary`;
+    // console.log("iframeSrc = " + iframeSrc);
+    const historyDifference = window.history.length - history.length;
+    if (historyDifference > 0) {
+        console.log("History length: " + history.length);
+        console.log("window.history length: " + window.history.length);
+        console.error("Off by " + historyDifference);
+        //window.history.go(-historyDifference);
+        //window.history.go(-1);
+        history.replace(history.location);
+        //console.log("new window.history length: " + window.history.length);
+        return null;
+    }
 
     // This theme matches Bloom-player. It is supposed to help the full-screen button
     // better match the Bloom-player icons, whose toolbar it overlays. Not successful

@@ -19,6 +19,12 @@ import {
     getFilterForCollectionAndChildren,
 } from "../model/Collections";
 
+export interface IParseCommonProps {
+    objectId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 // For things other than books, which should use `useBookQuery()`
 function useLibraryQuery(queryClass: string, params: {}): IReturns<any> {
     return useAxios({
@@ -50,12 +56,13 @@ export function useGetCleanedAndOrderedLanguageList(): ILanguage[] {
 }
 export function useGetTagList(): string[] {
     const axiosResult = useLibraryQuery("tag", {
-        limit: 1000,
-        count: 1000,
+        limit: Number.MAX_SAFE_INTEGER,
+        count: 1, // Requests the total count
         order: "name",
     });
 
     if (axiosResult.response?.data?.results) {
+        assertAllRecordsReturned(axiosResult.response.data);
         return axiosResult.response.data.results.map(
             (parseTag: { name: string }) => {
                 return parseTag.name;
@@ -82,6 +89,59 @@ export function useGetBookshelvesByCategory(
 
         return fullBookShelfDescriptions;
     } else return [];
+}
+
+export function useGetDistinctFeaturesList(): string[] {
+    const axiosResult = useLibraryQuery("books", {
+        keys: "features",
+        where: {
+            $and: [
+                {
+                    features: {
+                        $exists: true,
+                    },
+                },
+                {
+                    features: {
+                        $ne: [],
+                    },
+                },
+            ],
+        },
+        limit: Number.MAX_SAFE_INTEGER,
+        count: 1, // Requests the total count
+    });
+
+    if (axiosResult.response?.data?.results) {
+        const data = axiosResult.response.data as {
+            count: number;
+            results: Array<{ features: string[] } & IParseCommonProps>;
+        };
+        assertAllRecordsReturned(axiosResult.response.data);
+        const set = new Set<string>();
+        data.results.forEach((parseBook) => {
+            parseBook.features?.forEach((f) => {
+                set.add(f);
+            });
+        });
+
+        return [...set].sort();
+    }
+
+    return [];
+}
+
+function assertAllRecordsReturned(axiosResponseData: {
+    count: number;
+    results: Array<unknown>;
+}) {
+    const totalMatchingRecords = axiosResponseData.count;
+    const recordsInThisResponse = axiosResponseData.results.length;
+
+    console.assert(
+        totalMatchingRecords === recordsInThisResponse,
+        `Not all records returned in Parse request for distinct features. Please investigate. ${recordsInThisResponse} returned, ${totalMatchingRecords} total.`
+    );
 }
 
 export function useGetLanguageInfo(language: string): ILanguage[] {

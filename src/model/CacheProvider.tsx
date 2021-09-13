@@ -5,6 +5,7 @@ import {
     useGetCleanedAndOrderedLanguageList,
     IBookshelfResult,
     useGetBookshelvesByCategory,
+    useGetDistinctFeaturesList,
 } from "../connection/LibraryQueryHooks";
 
 import { ILanguage } from "./Language";
@@ -13,6 +14,7 @@ interface ICachedTables {
     tags: string[];
     languagesByBookCount: ILanguage[];
     bookshelves: IBookshelfResult[];
+    features: string[];
 }
 
 // for use when we aren't in a react context with hooks
@@ -20,34 +22,41 @@ export const CachedTables: ICachedTables = {
     tags: [],
     languagesByBookCount: [],
     bookshelves: [],
+    features: [],
 };
 
 export const CachedTablesContext = React.createContext<ICachedTables>({
     tags: [],
     languagesByBookCount: [],
     bookshelves: [],
+    features: [],
 });
 
 const loadingResult = {
     bookshelves: [],
     languagesByBookCount: [],
     tags: [],
+    features: [],
 };
 
 export const CacheProvider: React.FunctionComponent = (props) => {
     CachedTables.bookshelves = useGetBookshelvesByCategory();
     CachedTables.tags = useGetTagList();
     CachedTables.languagesByBookCount = useGetCleanedAndOrderedLanguageList();
+    CachedTables.features = useGetDistinctFeaturesList();
+    console.log("features.length: " + CachedTables.features.length);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const resultData =
         CachedTables.bookshelves.length &&
         CachedTables.tags.length &&
+        CachedTables.features.length &&
         CachedTables.languagesByBookCount.length
             ? {
                   bookshelves: CachedTables.bookshelves,
                   languagesByBookCount: CachedTables.languagesByBookCount,
                   tags: CachedTables.tags,
+                  features: CachedTables.features,
               }
             : loadingResult;
 

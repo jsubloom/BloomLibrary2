@@ -79,6 +79,16 @@
             "cwd": "${workspaceRoot}",
             "internalConsoleOptions": "openOnSessionStart",
             "skipFiles": ["<node_internals>/**", "node_modules/**"]
+        },
+        {
+            // This launches an Edge browser (which is Chromium under the hood, so comparable to launching Chrome)
+            // Then, you get a toolbar in VSCode that allows "Open Browser Devtools"
+            // This allows you to have Devtools in VSCode
+            "name": "Debug in Edge (Chromium)",
+            "request": "launch",
+            "type": "pwa-msedge",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/src"
         }
     ]
 }

@@ -128,6 +128,15 @@ export function getBookGridColumnsDefinitions(): IGridColumn[] {
             addToFilter: (filter: IFilter, value: string) => {
                 filter.search += ` feature:${value}`;
             },
+            getCustomFilterComponent: (props: TableFilterRow.CellProps) => (
+                <ChoicesFilterCell
+                    choices={[
+                        "", // Clear
+                        ...CachedTables.features,
+                    ]}
+                    {...props}
+                />
+            ),
         },
         {
             name: "country",
@@ -223,26 +232,22 @@ export function getBookGridColumnsDefinitions(): IGridColumn[] {
                 <ChoicesFilterCell choices={["All", "Yes", "No"]} {...props} />
             ),
             addToFilter: (filter: IFilter, value: string) => {
-                if (value === "No")
-                    filter.inCirculation = BooleanOptions.No;
-                if (value === "Yes")
-                    filter.inCirculation = BooleanOptions.Yes;
+                if (value === "No") filter.inCirculation = BooleanOptions.No;
+                if (value === "Yes") filter.inCirculation = BooleanOptions.Yes;
                 // otherwise don't mention it
             },
         },
         {
             name: "draft",
-            defaultVisible:false,
+            defaultVisible: false,
             sortingEnabled: false, // parse server doesn't seem to be able to sort on booleans?
             getCellValue: (b: Book) => (b.draft ? "Yes" : "No"),
             getCustomFilterComponent: (props: TableFilterRow.CellProps) => (
                 <ChoicesFilterCell choices={["All", "Yes", "No"]} {...props} />
             ),
             addToFilter: (filter: IFilter, value: string) => {
-                if (value === "No")
-                    filter.draft = BooleanOptions.No;
-                if (value === "Yes")
-                    filter.draft = BooleanOptions.Yes;
+                if (value === "No") filter.draft = BooleanOptions.No;
+                if (value === "Yes") filter.draft = BooleanOptions.Yes;
                 // otherwise don't mention it
             },
         },
